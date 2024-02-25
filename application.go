@@ -1,7 +1,7 @@
 package main
 
 import (
-	configs "starter_go/configs"
+	"starter_go/configs"
 	"starter_go/rest"
 	"strconv"
 

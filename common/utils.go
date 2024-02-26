@@ -17,3 +17,7 @@ func ToUInt(str string) uint {
 	}
 	return uint(uintNum)
 }
+
+func StringPtr(s string) *string {
+	return &s
+}

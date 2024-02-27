@@ -1,18 +1,20 @@
 package common
 
-import (
-	"github.com/gin-gonic/gin"
-)
+type FormError struct {
+	Field *string `json:"field"`
+	Value string  `json:"value"`
+}
 
-func HandleFormError(key *string, message string, c *gin.Context) {
+func HandleFormError(key *string, message string) FormError {
 	if key != nil {
-		c.JSON(400, gin.H{
-			"field":   key,
-			"message": message,
-		})
+		return FormError{
+			Field: key,
+			Value: message,
+		}
+
 	} else {
-		c.JSON(400, gin.H{
-			"message": message,
-		})
+		return FormError{
+			Value: message,
+		}
 	}
 }

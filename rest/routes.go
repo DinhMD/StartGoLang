@@ -1,15 +1,15 @@
 package rest
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 )
 
-func Routes(router *gin.Engine) {
+func Routes(router *fiber.App) {
 	//Authorize
-	router.POST("/app/register", Register)
-	router.POST("/app/login", Login)
+	router.Post("/app/register", Register)
+	router.Post("/app/login", Login)
 	//Products
-	router.GET("/app/products", GetProducts)
-	router.GET("/app/products/:id", GetProductById)
-	router.POST("/app/products", CreateProduct)
+	router.Get("/app/products", GetProducts)
+	router.Get("/app/products/:id", GetProductById)
+	router.Post("/app/products", CreateProduct)
 }

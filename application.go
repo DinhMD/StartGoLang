@@ -5,13 +5,21 @@ import (
 	"starter_go/rest"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
-	serverConfig := configs.InitializeConfig()
+	configs.InitializeConfig()
+	router := fiber.New()
 
-	router := gin.Default()
+	router.Use(func(f *fiber.Ctx) error {
+		if f.Path() != "/app/login" {
+			return configs.Authenticate(f)
+		}
+		return f.Next()
+	})
+
 	rest.Routes(router)
-	router.Run(serverConfig.Host + ":" + strconv.Itoa(serverConfig.Port))
+
+	router.Listen(configs.ENV.Host + ":" + strconv.Itoa(configs.ENV.Port))
 }

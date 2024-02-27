@@ -9,40 +9,42 @@ import (
 	"starter_go/infrastructure/repository"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 	"github.com/volatiletech/null/v9"
 )
 
-func CreateProduct(c *gin.Context) {
+func CreateProduct(c *fiber.Ctx) error {
 	repository := repository.NewProductRepository(configs.DB)
-	body, err := c.GetRawData()
-	if err != nil {
-		c.String(http.StatusInternalServerError, "Internal Server Error")
-		return
+	body := c.BodyRaw()
+	if body == nil {
+		c.Status(http.StatusInternalServerError).SendString("Internal Server Error")
+		return nil
 	}
 	var product models.Product
-	if err = json.Unmarshal(body, &product); err != nil {
-		c.String(http.StatusBadRequest, "Bad Request")
-		return
+	if err := json.Unmarshal(body, &product); err != nil {
+		return err
 	}
 	product.CreatedOn = null.TimeFrom(time.Now())
 	repository.Create(&product)
-	c.JSON(http.StatusCreated, product)
+	c.Status(http.StatusCreated).JSON(product)
+	return nil
 }
 
-func GetProducts(c *gin.Context) {
+func GetProducts(c *fiber.Ctx) error {
 	var products, err = repository.NewProductRepository(configs.DB).FindAll()
 	if err != nil {
-		panic(err)
+		return err
 	}
-	c.JSON(http.StatusOK, products)
+	c.JSON(products)
+	return nil
 }
 
-func GetProductById(c *gin.Context) {
-	var id = c.Param("id")
+func GetProductById(c *fiber.Ctx) error {
+	var id = c.Params("id")
 	var product, err = repository.NewProductRepository(configs.DB).FindById(common.ToUInt(id))
 	if err != nil {
-		panic(err)
+		return err
 	}
-	c.JSON(http.StatusOK, product)
+	c.JSON(product)
+	return nil
 }

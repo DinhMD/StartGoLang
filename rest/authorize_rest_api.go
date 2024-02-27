@@ -3,36 +3,56 @@ package rest
 import (
 	"encoding/json"
 	"net/http"
+	"starter_go/configs"
 	"starter_go/infrastructure/services"
 	dto "starter_go/rest/request_models"
 
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 )
 
-func Register(c *gin.Context) {
-	var body, err = c.GetRawData()
-	if err != nil {
-		c.String(http.StatusBadRequest, "Bad request")
-		return
+func Register(f *fiber.Ctx) error {
+	var body = f.BodyRaw()
+	if body == nil {
+		f.Status(http.StatusBadRequest)
+		return nil
 	}
 	var accountRequest dto.AccountRequest
-	if err = json.Unmarshal(body, &accountRequest); err != nil {
-		c.String(http.StatusBadRequest, "Bad request")
-		return
+	err := json.Unmarshal(body, &accountRequest)
+	if err != nil {
+		return err
 	}
-	services.CreateAnAccount(accountRequest, c)
+	saveError := services.CreateAnAccount(accountRequest, f)
+	if saveError != nil {
+		f.Status(http.StatusInternalServerError).JSON(saveError)
+		return nil
+	} else {
+		f.SendString("OK")
+		return nil
+	}
 }
 
-func Login(c *gin.Context) {
-	var body, err = c.GetRawData()
-	if err != nil {
-		c.String(http.StatusBadRequest, "Bad request")
-		return
+func Login(f *fiber.Ctx) error {
+	var body = f.BodyRaw()
+	if body == nil {
+		f.Status(http.StatusBadRequest)
+		return nil
 	}
 	var accountRequest dto.AccountRequest
-	if err = json.Unmarshal(body, &accountRequest); err != nil {
-		c.String(http.StatusBadRequest, "Bad request")
-		return
+	if err := json.Unmarshal(body, &accountRequest); err != nil {
+		f.Status(http.StatusBadRequest)
+		return err
 	}
-	services.ValidAccount(accountRequest, c)
+	account := services.CheckAccount(accountRequest, f)
+	if account == nil {
+		f.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid username or password"})
+		return nil
+	}
+	tokenString, err := configs.CreateToken(account.Username)
+	if err != nil {
+		return err
+	}
+	f.JSON(configs.AuthResponse{
+		Token: tokenString,
+	})
+	return nil
 }

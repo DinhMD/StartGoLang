@@ -14,6 +14,7 @@ type DB struct {
 }
 
 type Server struct {
-	Port int
-	Host string
+	Port      int    `json:"port"`
+	Host      string `json:"host"`
+	SecretKey string `json:"secret_key"`
 }

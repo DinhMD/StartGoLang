@@ -12,7 +12,9 @@ import (
 
 var DB *gorm.DB
 
-func InitializeConfig() *models.Server {
+var ENV *models.Server
+
+func InitializeConfig() {
 	confFile, err := os.Open("appconfig.json")
 	if err != nil {
 		panic(err)
@@ -32,6 +34,5 @@ func InitializeConfig() *models.Server {
 		panic(err)
 	}
 	DB = db
-
-	return &appconfig.Server
+	ENV = &appconfig.Server
 }

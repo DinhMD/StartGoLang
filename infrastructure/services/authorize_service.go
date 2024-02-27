@@ -8,14 +8,16 @@ import (
 	"starter_go/infrastructure/repository"
 	dto "starter_go/rest/request_models"
 
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 )
 
-func CreateAnAccount(accountRequest dto.AccountRequest, c *gin.Context) error {
-	validateAccount(accountRequest, c)
+func CreateAnAccount(accountRequest dto.AccountRequest, f *fiber.Ctx) *common.FormError {
+	validateAccount(accountRequest, f)
 	passwordHashed, err := models.HashPassword(accountRequest.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		return &common.FormError{
+			Value: "Internal Server Error",
+		}
 	}
 	account := models.Account{
 		Username: accountRequest.Username,
@@ -24,54 +26,74 @@ func CreateAnAccount(accountRequest dto.AccountRequest, c *gin.Context) error {
 	repository := repository.NewAccountRepository(configs.DB)
 	existedAccount, err := repository.FindByUsername(accountRequest.Username)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		return &common.FormError{
+			Value: "Internal Server Error",
+		}
+
 	}
 	if existedAccount.Username != "" {
-		common.HandleFormError(common.StringPtr("username"), "Username is existed", c)
+		return &common.FormError{
+			Field: common.StringPtr("username"),
+			Value: "Username is existed",
+		}
 	}
 	saveErr := repository.Create(&account)
 	if saveErr != nil {
-		c.JSON(http.StatusInternalServerError, saveErr)
+		return &common.FormError{
+			Value: "Internal Server Error",
+		}
 	}
 	return nil
 }
 
-func ValidAccount(accountRequest dto.AccountRequest, c *gin.Context) error {
+func CheckAccount(accountRequest dto.AccountRequest, f *fiber.Ctx) *models.Account {
 
 	repository := repository.NewAccountRepository(configs.DB)
 
 	existedAccount, err := repository.FindByUsername(accountRequest.Username)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		return nil
 	}
 	if models.CheckPasswordHash(accountRequest.Password, existedAccount.Password) {
-		c.String(http.StatusOK, "OK")
+		return &existedAccount
 	} else {
-		c.String(http.StatusUnauthorized, "Unauthorized")
+		return nil
 	}
-	return nil
 }
 
-func validateAccount(account dto.AccountRequest, c *gin.Context) bool {
+func validateAccount(account dto.AccountRequest, f *fiber.Ctx) bool {
 	if account.Username == "" || account.Password == "" {
-		c.JSON(http.StatusBadRequest, "Username and password is required")
-		common.HandleFormError(nil, "Username and password is required", c)
+		f.Status(http.StatusBadRequest).JSON(common.FormError{
+			Value: "Username and password is required",
+		})
 		return false
 	}
 	if len(account.Username) > 20 {
-		common.HandleFormError(common.StringPtr("username"), "Username is too long. Max 20 characters", c)
+		f.Status(http.StatusBadRequest).JSON(common.FormError{
+			Field: common.StringPtr("username"),
+			Value: "Username is too long. Max 20 characters",
+		})
 		return false
 	}
 	if len(account.Username) < 6 {
-		common.HandleFormError(common.StringPtr("username"), "Username is too short. Min 6 characters", c)
+		f.Status(http.StatusBadRequest).JSON(common.FormError{
+			Field: common.StringPtr("username"),
+			Value: "Username is too short. Min 6 characters",
+		})
 		return false
 	}
 	if len(account.Password) > 20 {
-		common.HandleFormError(common.StringPtr("password"), "Password is too long. Max 20 characters", c)
+		f.Status(http.StatusBadRequest).JSON(common.FormError{
+			Field: common.StringPtr("password"),
+			Value: "Password is too long. Max 20 characters",
+		})
 		return false
 	}
 	if len(account.Password) < 8 {
-		common.HandleFormError(common.StringPtr("password"), "Password is too short. Min 8 characters", c)
+		f.Status(http.StatusBadRequest).JSON(common.FormError{
+			Field: common.StringPtr("password"),
+			Value: "Password is too short. Min 8 characters",
+		})
 		return false
 	}
 	return true

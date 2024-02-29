@@ -3,10 +3,10 @@ package rest
 import (
 	"encoding/json"
 	"net/http"
-	"starter_go/common"
-	"starter_go/configs"
-	"starter_go/infrastructure/models"
-	"starter_go/infrastructure/repository"
+	"starter_go/app/common"
+	"starter_go/app/configs"
+	"starter_go/app/infrastructure/models"
+	"starter_go/app/infrastructure/repository"
 	"time"
 
 	"github.com/gofiber/fiber/v2"

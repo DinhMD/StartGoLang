@@ -1,7 +1,7 @@
 package main
 
 import (
-	"oauth/configs"
+	"starter_go/oauth/configs"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"

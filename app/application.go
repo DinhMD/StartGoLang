@@ -1,8 +1,8 @@
 package main
 
 import (
-	"starter_go/configs"
-	"starter_go/rest"
+	"starter_go/app/configs"
+	"starter_go/app/rest"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"

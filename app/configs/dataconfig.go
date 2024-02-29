@@ -2,7 +2,7 @@ package configs
 
 import (
 	"fmt"
-	"starter_go/configs/models"
+	"starter_go/app/configs/models"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

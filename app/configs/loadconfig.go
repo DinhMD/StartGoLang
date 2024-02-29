@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 
-	"starter_go/configs/models"
+	"starter_go/app/configs/models"
 
 	"gorm.io/gorm"
 )

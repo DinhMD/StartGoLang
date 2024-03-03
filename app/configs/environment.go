@@ -1,11 +1,12 @@
 package configs
 
 import (
-	"encoding/json"
 	"io"
 	"os"
 
 	"starter_go/app/configs/models"
+
+	yaml "gopkg.in/yaml.v3"
 
 	"gorm.io/gorm"
 )
@@ -15,7 +16,7 @@ var DB *gorm.DB
 var ENV *models.Server
 
 func InitializeConfig() {
-	confFile, err := os.Open("appconfig.json")
+	confFile, err := os.Open("application_config.yaml")
 	if err != nil {
 		panic(err)
 	}
@@ -25,7 +26,7 @@ func InitializeConfig() {
 		panic(err)
 	}
 	appconfig := models.Configuration{}
-	err = json.Unmarshal(conf, &appconfig)
+	err = yaml.Unmarshal(conf, &appconfig)
 	if err != nil {
 		panic(err)
 	}

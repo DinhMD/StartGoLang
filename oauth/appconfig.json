@@ -1,7 +1,0 @@
-{
-    "server": {
-        "port": 3002,
-        "host": "localhost",
-        "secret_key": "dinhmd_oauth_key"
-    }
-}

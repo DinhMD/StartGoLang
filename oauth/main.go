@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"starter_go/oauth/configs"
+	"starter_go/oauth/rest"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -11,10 +11,6 @@ import (
 func main() {
 	configs.InitializeConfig()
 	app := fiber.New()
-	app.Get("/", func(c *fiber.Ctx) error {
-		fmt.Println("Hello, World!")
-		c.SendString("Hello, World!")
-		return nil
-	})
+	rest.Routes(app)
 	app.Listen(":" + strconv.Itoa(configs.ENV.Port))
 }

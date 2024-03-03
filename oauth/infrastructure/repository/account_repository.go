@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"starter_go/app/infrastructure/models"
+	"starter_go/oauth/infrastructure/models"
 
 	"gorm.io/gorm"
 )

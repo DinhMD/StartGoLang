@@ -1,4 +1,4 @@
-package request_models
+package dto
 
 type AccountRequest struct {
 	Username string `json:"username"`

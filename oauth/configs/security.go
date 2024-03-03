@@ -18,7 +18,7 @@ type AuthResponse struct {
 }
 
 func CreateToken(username string) (string, error) {
-	expirationTime := time.Now().Add(5 * time.Minute)
+	expirationTime := time.Now().Add(24 * time.Hour)
 	claims := &Claims{
 		Username: username,
 		StandardClaims: jwt.StandardClaims{
@@ -49,5 +49,5 @@ func Authenticate(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid token"})
 	}
 
-	return c.Next()
+	return c.SendStatus(fiber.StatusOK)
 }

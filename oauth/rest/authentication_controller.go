@@ -3,12 +3,16 @@ package rest
 import (
 	"encoding/json"
 	"net/http"
-	"starter_go/app/configs"
-	"starter_go/app/infrastructure/services"
-	dto "starter_go/app/rest/request_models"
+	"starter_go/oauth/configs"
+	"starter_go/oauth/infrastructure/services"
+	dto "starter_go/oauth/rest/models"
 
 	"github.com/gofiber/fiber/v2"
 )
+
+type OAuthServer struct {
+	ClientStorage map[string]string
+}
 
 func Register(f *fiber.Ctx) error {
 	var body = f.BodyRaw()
@@ -34,17 +38,17 @@ func Register(f *fiber.Ctx) error {
 func Login(f *fiber.Ctx) error {
 	var body = f.BodyRaw()
 	if body == nil {
-		f.Status(http.StatusBadRequest)
+		f.Status(fiber.StatusBadRequest)
 		return nil
 	}
 	var accountRequest dto.AccountRequest
 	if err := json.Unmarshal(body, &accountRequest); err != nil {
-		f.Status(http.StatusBadRequest)
+		f.Status(fiber.StatusBadRequest)
 		return err
 	}
 	account := services.CheckAccount(accountRequest, f)
 	if account == nil {
-		f.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid username or password"})
+		f.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid username or password"})
 		return nil
 	}
 	tokenString, err := configs.CreateToken(account.Username)

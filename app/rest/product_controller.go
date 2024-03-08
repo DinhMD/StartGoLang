@@ -4,34 +4,55 @@ import (
 	"encoding/json"
 	"net/http"
 	"starter_go/app/common"
-	"starter_go/app/configs"
-	"starter_go/app/infrastructure/models"
-	"starter_go/app/infrastructure/repository"
-	"time"
+	"starter_go/app/infrastructure/services"
+	rest_models "starter_go/app/rest/models"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/volatiletech/null/v9"
 )
 
 func CreateProduct(c *fiber.Ctx) error {
-	repository := repository.NewProductRepository(configs.DB)
 	body := c.BodyRaw()
 	if body == nil {
 		c.Status(http.StatusInternalServerError).SendString("Internal Server Error")
 		return nil
 	}
-	var product models.Product
+	var product rest_models.ProductRequest
 	if err := json.Unmarshal(body, &product); err != nil {
 		return err
 	}
-	product.CreatedOn = null.TimeFrom(time.Now())
-	repository.Create(&product)
-	c.Status(http.StatusCreated).JSON(product)
+	id, err := services.Create(&product)
+	if err != nil || id == 0 {
+		c.Status(http.StatusInternalServerError).SendString("Internal Server Error")
+		return err
+	}
+	var response, _ = services.GetProductById(id)
+	c.Status(http.StatusCreated).JSON(response)
+	return nil
+}
+
+func UpdateProduct(c *fiber.Ctx) error {
+	body := c.BodyRaw()
+	reqId := c.Params("id")
+	if body == nil || reqId == "" {
+		c.Status(http.StatusInternalServerError).SendString("Internal Server Error")
+		return nil
+	}
+	var product rest_models.ProductRequest
+	if err := json.Unmarshal(body, &product); err != nil {
+		return err
+	}
+	id, err := services.Update(common.ToInt(reqId), &product)
+	if err != nil || id == 0 {
+		c.Status(http.StatusInternalServerError).SendString("Internal Server Error")
+		return err
+	}
+	var response, _ = services.GetProductById(id)
+	c.Status(http.StatusCreated).JSON(response)
 	return nil
 }
 
 func GetProducts(c *fiber.Ctx) error {
-	var products, err = repository.NewProductRepository(configs.DB).FindAll()
+	var products, err = services.GetProducts()
 	if err != nil {
 		return err
 	}
@@ -41,7 +62,7 @@ func GetProducts(c *fiber.Ctx) error {
 
 func GetProductById(c *fiber.Ctx) error {
 	var id = c.Params("id")
-	var product, err = repository.NewProductRepository(configs.DB).FindById(common.ToUInt(id))
+	var product, err = services.GetProductById(common.ToUInt(id))
 	if err != nil {
 		return err
 	}

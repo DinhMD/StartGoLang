@@ -14,8 +14,12 @@ func NewProductRepository(db *gorm.DB) *ProductRepository {
 	return &ProductRepository{db}
 }
 
-func (repo *ProductRepository) Create(product *models.Product) error {
-	return repo.db.Create(product).Error
+func (repo *ProductRepository) Create(product *models.Product) *gorm.DB {
+	return repo.db.Create(product)
+}
+
+func (repo *ProductRepository) Update(product *models.Product) *gorm.DB {
+	return repo.db.Updates(product)
 }
 
 func (repo *ProductRepository) FindAll() ([]models.Product, error) {
